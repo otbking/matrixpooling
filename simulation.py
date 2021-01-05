@@ -104,24 +104,75 @@ def generatetray(trayx, trayy):
 		display += "\n"
 	return display
 
+def compare(samples, prevalence, tradsize, matrixsize):
+	msamples = (matrixsize ** 2)
+	core = msamples * tradsize
+	slotmulti = (matrixsize * 2)/(msamples/tradsize)
+	samples = core - (samples % core) + samples
+	trials = int(samples/core)
+	i = [0, 0]
+
+	for a in range(trials):
+		for b in range(msamples):
+			i[0] += traditional(prevalence, tradsize)
+		for b in range(tradsize):
+			i[1] += matrixpooling(prevalence, matrixsize)
+	#print(slotmulti)
+	#print(i)
+	i = i[0]/(slotmulti * i[1])
+	return([prevalence, tradsize, matrixsize, samples, i])	
+
+def matrixcompare(samples, prevalence, matrixsize1, matrixsize2):
+	msamples1 = (matrixsize1 ** 2)
+	msamples2 = (matrixsize2 ** 2)
+	core = msamples1 * msamples2
+	slotmulti = (matrixsize1 / 2) / (matrixsize2 / 2)
+	samples = core - (samples % core) + samples
+	trials = int(samples/core)
+	i = [0, 0]
+
+	for a in range(trials):
+		for b in range(msamples2):
+			i[0] += matrixpooling(prevalence, matrixsize1)
+		for b in range(msamples1):
+			i[1] += matrixpooling(prevalence, matrixsize2)
+	print(i)
+	print(slotmulti)
+	i = i[0]/(i[1]*slotmulti)
+	return([prevalence, matrixsize1, matrixsize2, samples, i])
+
 def main():
+	samples = 2400000
+	print(matrixcompare(1000000,.33,4,3))
+	print(compare(samples,.05,1,4))
+	print(compare(samples,.05,1,3))
+	"""
+	print(compare(samples,.19,2,4))
+	print(compare(samples,.16,3,4))
+	print(compare(samples,.14,4,4))
+	print(compare(samples,.25,2,3))
+	print(compare(samples,.21,3,3))
+	print(compare(samples,.19,4,3))
+	print(compare(samples,.05,2,4))
+	print(matrixcompare(samples,.05,4,3))
+
 	i = [0, 0]
 	for a in range(12000):
 		for b in range(8):
 			i[0] += traditional(0.19, 2)
-		i[1] += matrixpooling(0.19, 4)
+		for b in range(1):
+			i[1] += matrixpooling(0.19, 4)
 	print(i)
-
+	print(i[0]/i[1])
 	i = [0, 0]
 	for a in range(12000):
 		for b in range(9):
-			i[0] += traditional(0.45, 2)
-		i[1] += matrixpooling(0.45, 3)
-		i[1] += matrixpooling(0.45, 3)
-	print(i)
+			i[0] += traditional(0.25, 2)
+		for b in range(2):
+			i[1] += (4/3) * matrixpooling(0.25, 3)
+	print(i[1]/i[0])
 
 	# for a in range(1200000):
-	"""
 	i[0] *= 8 
 	i[0] /= 100000
 	i[1] /= 100000
