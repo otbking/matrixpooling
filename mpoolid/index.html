@@ -1,0 +1,212 @@
+<html>
+	<head>
+		<script>
+			var vert = undefined;
+			var hoz = undefined;
+			var size = undefined;
+			
+			function sizeSelect() {
+				if (document.getElementById("radiothree").checked){
+					size = "3";
+					document.getElementById("threematrix").style.display = "block";
+					document.getElementById("fourmatrix").style.display = "none";
+				} else{
+					size = "4";
+					document.getElementById("threematrix").style.display = "none";
+					document.getElementById("fourmatrix").style.display = "block";
+				}
+			}
+			
+			function poolSelectHelper(bool){
+				var ret = "0";
+				if (bool === true){
+					ret = "1";
+				}
+				return ret;
+			}
+			
+			function poolSelect(){
+				if (document.getElementById("radiothree").checked){
+					hoz = 	poolSelectHelper(document.getElementById("threehoz1").checked) +
+							poolSelectHelper(document.getElementById("threehoz2").checked) +
+							poolSelectHelper(document.getElementById("threehoz3").checked);
+					vert = 	poolSelectHelper(document.getElementById("threevert1").checked) +
+							poolSelectHelper(document.getElementById("threevert2").checked) +
+							poolSelectHelper(document.getElementById("threevert3").checked);
+				} else{
+					hoz = 	poolSelectHelper(document.getElementById("fourhoz1").checked) +
+							poolSelectHelper(document.getElementById("fourhoz2").checked) +
+							poolSelectHelper(document.getElementById("fourhoz3").checked) +
+							poolSelectHelper(document.getElementById("fourhoz4").checked);
+					vert = 	poolSelectHelper(document.getElementById("fourvert1").checked) +
+							poolSelectHelper(document.getElementById("fourvert2").checked) +
+							poolSelectHelper(document.getElementById("fourvert3").checked) +
+							poolSelectHelper(document.getElementById("fourvert4").checked);
+				}
+				var rsamp = retestSamples(hoz, vert, size);
+				var strsize = undefined;
+				
+				if (size === "3"){
+					strsize = "three";
+				} else{
+					strsize = "four";
+				}
+				
+				document.getElementById("cat").innerHTML = /*"vert: " + vert + " hoz: " + hoz + " " +*/ printSamples(rsamp)[0];
+				
+				var xcolor = printSamples(rsamp)[1];
+				
+				var ref = undefined;
+				
+				for (i = 1; i <= size * size; i++){
+					ref = strsize + "sample" + i.toString();
+					document.getElementById(ref).style.color = "black";
+				}
+				for (i = 0; i < rsamp[1].length; i++){
+					//document.getElementById("cat").innerHTML = rsamp[1][i];
+					ref = strsize + "sample" + rsamp[1][i].toString();
+					document.getElementById(ref).style.color = xcolor;
+				}
+			}
+			
+			function matrixRetests(reducedhoz, reducedvert, matrixsize){
+				var r = 0;
+				var hozpositive = 0;
+				var vertpositive = 0;
+				for (i = 0; i < matrixsize; i++){
+					hozpositive += parseInt(reducedhoz[i]);
+					vertpositive += parseInt(reducedvert[i]);
+				}
+				if (hozpositive > 1 && vertpositive > 1){
+					r = hozpositive * vertpositive;
+				}
+				return r;
+			}
+			
+			function retestSamples(reducedhoz, reducedvert, matrixsize){
+				matrixsize = parseInt(matrixsize);
+				var samples = [];
+				var hozpospools = [];
+				var vertpospools = [];
+				var unequivocal = false;
+				if (matrixRetests(reducedhoz, reducedvert, matrixsize) === 0){
+					unequivocal = true;
+				}
+				for (i = 0; i < matrixsize; i++){
+					if (parseInt(reducedhoz[i]) === 1){
+						hozpospools.push(i);
+					}
+					if (parseInt(reducedvert[i]) === 1){
+						vertpospools.push(i);
+					}
+				}
+				for (i = 0; i < hozpospools.length; i++){
+					for (j = 0; j < vertpospools.length; j++){
+						samples.push((matrixsize*hozpospools[i]) + vertpospools[j]);
+					}
+				}
+				for (i = 0; i < samples.length; i++){
+					samples[i] += 1;
+				}
+				return([unequivocal, samples]);
+			}
+			
+			function printSamples(rsamples){
+				var poscount = undefined;
+				var retstr = "";
+				var tcolor = "";
+				if (rsamples[0] === true){
+					poscount = rsamples[1].length;
+					if (poscount > 1){
+						retstr += "No retests, " + poscount.toString() + " positive samples detected: [" + rsamples[1].toString() + "]";
+						tcolor = "red";
+					} else if(poscount === 1){
+						retstr += "No retests, 1 positive sample detected: [" + rsamples[1].toString() + "]";
+						tcolor = "red";
+					} else{
+						retstr += "";
+					}
+				} else{
+					retstr += rsamples[1].length.toString() + " retests: [" + rsamples[1].toString() + "]";
+					tcolor = "#2266FF";
+				}
+				return [retstr,tcolor];
+			}
+			
+		</script>
+	</head>
+	<body>
+		<form>
+			<b> Matrix size </b> <br />
+			<input type="radio" name="size" id="radiothree" value="three" onclick="sizeSelect()" /> 3x3 <br />
+			<input type="radio" name="size" id="radiofour" value="four" onclick="sizeSelect()" /> 4x4 <br />
+		</form>
+		<b> Matrix </b> <br />
+		<div id="threematrix">
+		<table>
+			<tr>
+				<th> <input id="threevert1" type="checkbox" onclick="poolSelect()" /> </th>
+				<th> <input id="threevert2" type="checkbox" onclick="poolSelect()" /> </th>
+				<th> <input id="threevert3" type="checkbox" onclick="poolSelect()" /> </th>
+			</tr>
+			<tr>
+				<td id="threesample1"> 1</td>
+				<td id="threesample2"> 2</td>
+				<td id="threesample3"> 3</td>
+				<td> <input id="threehoz1" type="checkbox" onclick="poolSelect()" /> </td>
+			</tr>
+			<tr>
+				<td id="threesample4"> 4</td>
+				<td id="threesample5"> 5</td>
+				<td id="threesample6"> 6</td>
+				<td> <input id="threehoz2" type="checkbox" onclick="poolSelect()" /> </td>
+			</tr>
+			<tr>
+				<td id="threesample7"> 7</td>
+				<td id="threesample8"> 8</td>
+				<td id="threesample9"> 9</td>
+				<td> <input id="threehoz3" type="checkbox" onclick="poolSelect()" /> </td>
+			</tr>
+		</table>
+		</div>
+		<div id="fourmatrix">
+			<table>
+				<tr>
+					<th> <input id="fourvert1" type="checkbox" onclick="poolSelect()" /> </th>
+					<th> <input id="fourvert2" type="checkbox" onclick="poolSelect()" /> </th>
+					<th> <input id="fourvert3" type="checkbox" onclick="poolSelect()" /> </th>
+					<th> <input id="fourvert4" type="checkbox" onclick="poolSelect()" /> </th>
+				</tr>
+				<tr>
+					<td id="foursample1"> 1</td>
+					<td id="foursample2"> 2</td>
+					<td id="foursample3"> 3</td>
+					<td id="foursample4"> 4</td>
+					<td> <input id="fourhoz1" type="checkbox" onclick="poolSelect()" /> </td>
+				</tr>
+				<tr>
+					<td id="foursample5"> 5</td>
+					<td id="foursample6"> 6</td>
+					<td id="foursample7"> 7</td>
+					<td id="foursample8"> 8</td>
+					<td> <input id="fourhoz2" type="checkbox" onclick="poolSelect()" /> </td>
+				</tr>
+				<tr>
+					<td id="foursample9"> 9</td>
+					<td id="foursample10"> 10</td>
+					<td id="foursample11"> 11</td>
+					<td id="foursample12"> 12</td>
+					<td> <input id="fourhoz3" type="checkbox" onclick="poolSelect()" /> </td>
+				</tr>
+				<tr>
+					<td id="foursample13"> 13</td>
+					<td id="foursample14"> 14</td>
+					<td id="foursample15"> 15</td>
+					<td id="foursample16"> 16</td>
+					<td> <input id="fourhoz4" type="checkbox" onclick="poolSelect()" /> </td>
+				</tr>
+			</table>
+		</div>
+		<p id="cat"> Please select a matrix size and indicate positive pools. </p>
+	</body>
+</html>

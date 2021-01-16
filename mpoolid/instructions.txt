@@ -1,0 +1,5 @@
+launch index.html with your web browser of choice or
+run retest.py in command line with the following format
+$ python3 retest.py <hoz> <vert> <size>
+where <hoz> and <vert> are the status of horizontal and vertical pools respectively formatted where 1 indicates a positive pool and 0 indicates a negative pooll and size is the size of the matrix
+for example: $ python3 retest.py 011 110 3
